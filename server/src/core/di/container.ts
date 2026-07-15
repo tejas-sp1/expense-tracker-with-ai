@@ -9,6 +9,17 @@ import { CategoryController } from '../../features/categories/controllers/catego
 import { ExpenseRepository } from '../../modules/expense/repositories/expense.repository.js';
 import { ExpenseService } from '../../modules/expense/services/expense.service.js';
 import { ExpenseController } from '../../modules/expense/controllers/expense.controller.js';
+import { IncomeRepository } from '../../modules/income/repositories/income.repository.js';
+import { IncomeService } from '../../modules/income/services/income.service.js';
+import { IncomeController } from '../../modules/income/controllers/income.controller.js';
+import { BudgetRepository } from '../../modules/budget/repositories/budget.repository.js';
+import { BudgetService } from '../../modules/budget/services/budget.service.js';
+import { BudgetController } from '../../modules/budget/controllers/budget.controller.js';
+import { GoalRepository } from '../../modules/goal/repositories/goal.repository.js';
+import { GoalService } from '../../modules/goal/services/goal.service.js';
+import { GoalController } from '../../modules/goal/controllers/goal.controller.js';
+import { DashboardService } from '../../features/dashboard/services/dashboard.service.js';
+import { DashboardController } from '../../features/dashboard/controllers/dashboard.controller.js';
 import { AdminController } from '../../features/admin/controllers/admin.controller.js';
 import { HealthController } from '../../features/health/controllers/health.controller.js';
 import { prisma } from '../../infrastructure/database/prisma.js';
@@ -20,6 +31,10 @@ export interface AppContainer {
     auth: AuthController;
     category: CategoryController;
     expense: ExpenseController;
+    income: IncomeController;
+    budget: BudgetController;
+    goal: GoalController;
+    dashboard: DashboardController;
     admin: AdminController;
     health: HealthController;
   };
@@ -38,6 +53,23 @@ export function createContainer(env: Env): AppContainer {
   const expenseService = new ExpenseService(expenseRepository);
   const expenseController = new ExpenseController(expenseService);
 
+  const incomeRepository = new IncomeRepository(prisma);
+  const incomeService = new IncomeService(incomeRepository);
+  const incomeController = new IncomeController(incomeService);
+
+  const budgetRepository = new BudgetRepository(prisma);
+  const budgetService = new BudgetService(budgetRepository);
+  const budgetController = new BudgetController(budgetService);
+
+  const goalRepository = new GoalRepository(prisma);
+  const goalService = new GoalService(goalRepository);
+  const goalController = new GoalController(goalService);
+
+  // Dashboard reuses the budget and expense services above rather than
+  // re-deriving the same numbers with separate queries.
+  const dashboardService = new DashboardService(prisma, budgetService, expenseService);
+  const dashboardController = new DashboardController(dashboardService);
+
   const adminController = new AdminController(prisma);
   const healthController = new HealthController(prisma);
 
@@ -48,6 +80,10 @@ export function createContainer(env: Env): AppContainer {
       auth: authController,
       category: categoryController,
       expense: expenseController,
+      income: incomeController,
+      budget: budgetController,
+      goal: goalController,
+      dashboard: dashboardController,
       admin: adminController,
       health: healthController,
     },

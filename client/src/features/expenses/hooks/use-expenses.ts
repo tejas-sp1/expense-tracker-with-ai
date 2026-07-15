@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { expenseApi } from '../api/expense-api';
+import { budgetKeys } from '@/features/budget/hooks/use-budget';
 import type { CreateExpenseInput, ExpenseFilters, UpdateExpenseInput } from '@/types';
 
 export const expenseKeys = {
@@ -30,6 +31,8 @@ export function useCreateExpense() {
     mutationFn: (data: CreateExpenseInput) => expenseApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      // Budget "spent so far" progress is derived from expenses, so refresh those too
+      queryClient.invalidateQueries({ queryKey: budgetKeys.all });
     },
   });
 }
@@ -41,6 +44,7 @@ export function useUpdateExpense() {
       expenseApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      queryClient.invalidateQueries({ queryKey: budgetKeys.all });
     },
   });
 }
@@ -51,6 +55,7 @@ export function useDeleteExpense() {
     mutationFn: (id: string) => expenseApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
+      queryClient.invalidateQueries({ queryKey: budgetKeys.all });
     },
   });
 }

@@ -1,7 +1,10 @@
 import { Wallet, LogOut } from 'lucide-react';
 import { DashboardSummary } from '@/features/dashboard/components/DashboardSummary';
 import { ExpenseList } from '@/features/expenses/components/ExpenseList';
+import { IncomeList } from '@/features/income/components/IncomeList';
 import { CategoryManager } from '@/features/categories/components/CategoryManager';
+import { BudgetManager } from '@/features/budget/components/BudgetManager';
+import { SavingsGoalsManager } from '@/features/goals/components/SavingsGoalsManager';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,11 +47,14 @@ export function AppLayout() {
       <main className="container mx-auto space-y-6 px-4 py-8">
         <DashboardSummary />
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="space-y-6 lg:col-span-2">
+            <IncomeList />
             <ExpenseList />
           </div>
-          <div>
+          <div className="space-y-6">
             <CategoryManager />
+            <BudgetManager />
+            <SavingsGoalsManager />
           </div>
         </div>
       </main>
