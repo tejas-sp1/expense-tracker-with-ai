@@ -2,7 +2,7 @@ import type { Application } from 'express';
 import type { AppContainer } from '../core/di/container.js';
 import { authenticate } from '../core/middleware/authenticate.js';
 import { ResponseFormatter } from '../core/http/response.js';
-import { createAuthRoutes } from '../modules/auth/routes/auth.routes.js';
+import { createAuthRoutes } from '../features/auth/routes/auth.routes.js';
 import { createAdminRoutes } from '../features/admin/routes/admin.routes.js';
 import { createCategoryRoutes } from '../modules/category/routes/category.routes.js';
 import { createExpenseRoutes } from '../modules/expense/routes/expense.routes.js';

@@ -1,8 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
 import type { Env } from '../config/env.js';
-import { AuthRepository } from '../../modules/auth/repositories/auth.repository.js';
-import { AuthService } from '../../modules/auth/services/auth.service.js';
-import { AuthController } from '../../modules/auth/controllers/auth.controller.js';
+import { AuthRepository } from '../../features/auth/repositories/auth.repository.js';
+import { AuthService } from '../../features/auth/services/auth.service.js';
+import { AuthController } from '../../features/auth/controllers/auth.controller.js';
 import { CategoryRepository } from '../../modules/category/repositories/category.repository.js';
 import { CategoryService } from '../../modules/category/services/category.service.js';
 import { CategoryController } from '../../modules/category/controllers/category.controller.js';
@@ -41,10 +41,9 @@ export interface AppContainer {
 }
 
 export function createContainer(env: Env): AppContainer {
-  // Auth Module: passing only 1 expected argument to the new service constructor
-  const authRepository = new AuthRepository();
-  const authService = new AuthService(authRepository);
-  const authController = new AuthController(authService);
+  const authRepository = new AuthRepository(prisma);
+  const authService = new AuthService(authRepository, env);
+  const authController = new AuthController(authService, env);
 
   // Category Module
   const categoryRepository = new CategoryRepository();
