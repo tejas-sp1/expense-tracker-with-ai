@@ -149,7 +149,9 @@ export function DashboardSummary() {
                     tickLine={false}
                     tickFormatter={(v: number) => formatCurrency(v).replace(/\.00$/, '')}
                   />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Tooltip
+                    formatter={(value: unknown) => formatCurrency(Number(value as number))}
+                  />
                   <Legend />
                   <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expense" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
@@ -183,7 +185,9 @@ export function DashboardSummary() {
                       <Cell key={entry.categoryId} fill={entry.categoryColor} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Tooltip
+                    formatter={(value: unknown) => formatCurrency(Number(value as number))}
+                  />
                   <Legend
                     layout="vertical"
                     verticalAlign="middle"

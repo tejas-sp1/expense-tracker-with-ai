@@ -1,11 +1,11 @@
 import type { PrismaClient } from '@prisma/client';
 import type { Env } from '../config/env.js';
-import { AuthRepository } from '../../features/auth/repositories/auth.repository.js';
-import { AuthService } from '../../features/auth/services/auth.service.js';
-import { AuthController } from '../../features/auth/controllers/auth.controller.js';
-import { CategoryRepository } from '../../features/categories/repositories/category.repository.js';
-import { CategoryService } from '../../features/categories/services/category.service.js';
-import { CategoryController } from '../../features/categories/controllers/category.controller.js';
+import { AuthRepository } from '../../modules/auth/repositories/auth.repository.js';
+import { AuthService } from '../../modules/auth/services/auth.service.js';
+import { AuthController } from '../../modules/auth/controllers/auth.controller.js';
+import { CategoryRepository } from '../../modules/category/repositories/category.repository.js';
+import { CategoryService } from '../../modules/category/services/category.service.js';
+import { CategoryController } from '../../modules/category/controllers/category.controller.js';
 import { ExpenseRepository } from '../../modules/expense/repositories/expense.repository.js';
 import { ExpenseService } from '../../modules/expense/services/expense.service.js';
 import { ExpenseController } from '../../modules/expense/controllers/expense.controller.js';
@@ -41,32 +41,37 @@ export interface AppContainer {
 }
 
 export function createContainer(env: Env): AppContainer {
-  const authRepository = new AuthRepository(prisma);
-  const authService = new AuthService(authRepository, env);
-  const authController = new AuthController(authService, env);
+  // Auth Module: passing only 1 expected argument to the new service constructor
+  const authRepository = new AuthRepository();
+  const authService = new AuthService(authRepository);
+  const authController = new AuthController(authService);
 
-  const categoryRepository = new CategoryRepository(prisma);
+  // Category Module
+  const categoryRepository = new CategoryRepository();
   const categoryService = new CategoryService(categoryRepository);
   const categoryController = new CategoryController(categoryService);
 
+  // Expense Module
   const expenseRepository = new ExpenseRepository(prisma);
   const expenseService = new ExpenseService(expenseRepository);
   const expenseController = new ExpenseController(expenseService);
 
+  // Income Module
   const incomeRepository = new IncomeRepository(prisma);
   const incomeService = new IncomeService(incomeRepository);
   const incomeController = new IncomeController(incomeService);
 
+  // Budget Module
   const budgetRepository = new BudgetRepository(prisma);
   const budgetService = new BudgetService(budgetRepository);
   const budgetController = new BudgetController(budgetService);
 
+  // Goal Module
   const goalRepository = new GoalRepository(prisma);
   const goalService = new GoalService(goalRepository);
   const goalController = new GoalController(goalService);
 
-  // Dashboard reuses the budget and expense services above rather than
-  // re-deriving the same numbers with separate queries.
+  // Dashboard reuses the budget and expense services
   const dashboardService = new DashboardService(prisma, budgetService, expenseService);
   const dashboardController = new DashboardController(dashboardService);
 
