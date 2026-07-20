@@ -3,8 +3,9 @@ import { IAuthRepository } from '../interfaces/auth-repository.interface.js';
 import { RegisterDto } from '../dto/register.dto.js';
 import { LoginDto } from '../dto/login.dto.js';
 import { AppError } from '../../../core/errors/app-error.js';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { signAccessToken } from '../../../infrastructure/auth/jwt.js';
+import * as bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 
 export class AuthService implements IAuthService {
@@ -32,7 +33,7 @@ export class AuthService implements IAuthService {
       lastName: lastName || 'Last', // Standard backup default if no space provided
     });
 
-    const tokens = this.generateTokens(user.id);
+    const tokens = this.generateTokens(user);
     const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword, tokens };
@@ -51,19 +52,22 @@ export class AuthService implements IAuthService {
       throw new AppError(401, 'Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user.id);
+    const tokens = this.generateTokens(user);
     const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword, tokens };
   }
-  private generateTokens(userId: string): AuthTokens {
-    const accessToken = jwt.sign(
-      { sub: userId },
-      process.env.JWT_ACCESS_SECRET || 'access-secret',
-      { expiresIn: '15m' },
-    );
+  private generateTokens(
+    user: Pick<User, 'id' | 'email' | 'role' | 'emailVerified'>,
+  ): AuthTokens {
+    const accessToken = signAccessToken({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      emailVerified: user.emailVerified,
+    });
     const refreshToken = jwt.sign(
-      { sub: userId },
+      { sub: user.id },
       process.env.JWT_REFRESH_SECRET || 'refresh-secret',
       { expiresIn: '7d' },
     );

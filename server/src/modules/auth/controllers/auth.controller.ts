@@ -8,7 +8,7 @@ export class AuthController {
     try {
       const { user, tokens } = await this.authService.register(req.body);
       this.setCookieTokens(res, tokens);
-      res.status(201).json({ success: true, data: { user } });
+      res.status(201).json({ success: true, data: { user, accessToken: tokens.accessToken } });
     } catch (error) {
       next(error);
     }
@@ -18,7 +18,7 @@ export class AuthController {
     try {
       const { user, tokens } = await this.authService.login(req.body);
       this.setCookieTokens(res, tokens);
-      res.status(200).json({ success: true, data: { user } });
+      res.status(200).json({ success: true, data: { user, accessToken: tokens.accessToken } });
     } catch (error) {
       next(error);
     }

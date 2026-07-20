@@ -33,6 +33,28 @@ interface ApiResponse<T> {
   };
 }
 
+async function readApiResponse<T>(response: Response): Promise<ApiResponse<T> | null> {
+  const text = await response.text();
+
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text) as ApiResponse<T>;
+  } catch {
+    return null;
+  }
+}
+
+function getErrorMessage(response: Response, body: ApiResponse<unknown> | null): string {
+  if (body?.error?.message) return body.error.message;
+
+  if (response.status >= 500) {
+    return 'Unable to reach the API server. Make sure the server is running and try again.';
+  }
+
+  return response.statusText || 'Request failed';
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const response = await fetch(`${API_URL}/auth/refresh`, {
     method: 'POST',
@@ -42,8 +64,8 @@ async function refreshAccessToken(): Promise<string | null> {
 
   if (!response.ok) return null;
 
-  const body = (await response.json()) as ApiResponse<{ accessToken: string }>;
-  if (!body.success || !body.data?.accessToken) return null;
+  const body = await readApiResponse<{ accessToken: string }>(response);
+  if (!body?.success || !body.data?.accessToken) return null;
 
   accessToken = body.data.accessToken;
   return accessToken;
@@ -82,14 +104,14 @@ async function request<T>(path: string, options?: RequestInit, retry = true): Pr
     return undefined as T;
   }
 
-  const body = (await response.json()) as ApiResponse<T>;
+  const body = await readApiResponse<T>(response);
 
-  if (!response.ok || !body.success) {
+  if (!response.ok || !body?.success) {
     throw new ApiError(
-      body.error?.message ?? 'Request failed',
+      getErrorMessage(response, body),
       response.status,
-      body.error?.code,
-      body.error?.details,
+      body?.error?.code,
+      body?.error?.details,
     );
   }
 
