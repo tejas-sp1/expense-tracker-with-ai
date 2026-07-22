@@ -8,12 +8,17 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   async findById(id: string): Promise<Category | null> {
-    return prisma.category.findUnique({ where: { id } });
+    return prisma.category.findFirst({ where: { id, deletedAt: null } });
+  }
+
+  async findByUserAndSlug(userId: string, slug: string): Promise<Category | null> {
+    return prisma.category.findFirst({ where: { userId, slug, deletedAt: null } });
   }
 
   async findByUser(userId: string): Promise<Category[]> {
     return prisma.category.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
+      orderBy: { name: 'asc' },
     });
   }
 
@@ -21,7 +26,11 @@ export class CategoryRepository implements ICategoryRepository {
     return prisma.category.update({ where: { id }, data });
   }
 
-  async delete(id: string): Promise<Category> {
-    return prisma.category.delete({ where: { id } });
+  async softDelete(id: string): Promise<Category> {
+    return prisma.category.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
+
+  async countExpenses(id: string): Promise<number> {
+    return prisma.expense.count({ where: { categoryId: id, deletedAt: null } });
   }
 }
